@@ -8,6 +8,7 @@ django = "*"
 channels = {extras = ["daphne"], version = "*"}
 channels-redis = "*"
 typing = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
