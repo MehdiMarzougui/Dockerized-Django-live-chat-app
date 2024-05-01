@@ -11,7 +11,24 @@ services:
   redis:
     image: redis
 
-  app:
+  app1:
+    build:
+      context: .
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}wh
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "python manage.py makemigrations &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+      - redis
+
+  app2:
     build:
       context: .
     environment:
@@ -20,8 +37,6 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./:/app
-    ports:
-      - 127.0.0.1:8000:8000
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
@@ -29,6 +44,16 @@ services:
     depends_on:
       - db
       - redis
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginxLoadBalancer/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 80:80
+    depends_on:
+      - app1
+      - app2
 
 volumes:
   livechat_db:
